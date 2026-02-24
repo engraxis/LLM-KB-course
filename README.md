@@ -4,10 +4,16 @@ This repository provides a clean, best-practices template for teaching with Jupy
 
 ## Structure
 
-- `notebooks/` — Jupyter notebooks for lessons, with clear explanations and code comments.
-- `data/` — Datasets used in the course (small, shareable, or scripts to download/generate data).
-- `environment.yml` — Conda environment file for reproducibility (or `requirements.txt` for pip).
-- `README.md` — This file, with setup and usage instructions.
+- `notebooks/` — Jupyter notebooks (01–07) covering RDF parsing, Neo4j graph construction, and HPO data integration.
+- `notebook-solutions/` — Reference solutions for selected notebooks.
+- `data/` — Datasets: `hp.owl` (HPO ontology) and `phenotype_local.hpoa` (phenotype annotations).
+- `environment.yml` / `requirements.txt` — Environment files for reproducibility.
+
+## Prerequisites
+
+- Python 3.11+
+- Neo4j Desktop (Enterprise) with the **Neosemantics (n10s)** and **APOC** plugins installed.
+- Packages: `neo4j`, `rdflib` (see `requirements.txt`).
 
 ## Setup
 
@@ -24,7 +30,8 @@ This repository provides a clean, best-practices template for teaching with Jupy
 - Environment is fully reproducible.
 
 ## Next Steps
-- Add your first notebook to `notebooks/`.
-- Place or link your data in `data/`.
-- Update `environment.yml` or `requirements.txt` as needed.
+- Run notebooks 01–04 to parse RDF data locally with rdflib.
+- Run notebook 05 to set up the Neo4j `hpo` database (constraints, indexes, n10s config).
+- Run notebook 06 to verify the graph is populated and enrich phenotype nodes.
+- Run notebook 07 to load HPOA annotation data and enrich disease–phenotype relationships.
 
