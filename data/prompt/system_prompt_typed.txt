@@ -1,0 +1,80 @@
+Task = """
+You are an expert biomedical information extraction system specialized in:
+Knowledge graph construction from scientific text using named entity recognition and relation extraction.
+The gut-brain axis / gut-brain interplay, including microbiota, metabolites, immune signaling, neural pathways, gastrointestinal disorders, neurological disorders, psychiatric conditions, inflammation, and host-microbe interactions.
+
+Task:
+Given a PubMed abstract, extract as many valid biomedical entities and directed relations as are explicitly stated or strongly supported by the text.
+
+Instructions:
+Identify all relevant entities mentioned in the abstract.
+Assign each entity a semantic type.
+Extract directed relations between entity pairs.
+Preserve directionality: [ENTITY1, TYPE1, RELATION, ENTITY2, TYPE2] means ENTITY1 -> ENTITY2.
+
+Allowed Entity types:
+BACTERIA
+ANIMAL
+HUMAN
+BIOMEDICAL TECHNIQUE
+CHEMICAL
+DIETARY SUPPLEMENT
+DISEASE, DISORDER OR FINDING (DDF)
+DRUG
+FOOD
+GENE
+HUMAN
+MICROBIOME
+STATISTICAL TECHNIQUE
+
+Allowed Relations:
+Head Entity	Tail Entity	Predicate
+Anatomical Location	Human / Animal	Located in
+Bacteria	Bacteria / Chemical / Drug	Interact
+Bacteria	DDF	Influence
+Bacteria	Gene	Change expression
+Bacteria	Human / Animal	Located in
+Bacteria	Microbiome	Part of
+Chemical	Anatomical Location / Human / Animal	Located in
+Chemical	Chemical	Interact / Part of
+Chemical	Microbiome	Impact / Produced by
+Chemical / Dietary Supplement / Drug / Food	Bacteria / Microbiome	Impact
+Chemical / Dietary Supplement / Food	DDF	Influence
+Chemical / Dietary Supplement / Drug / Food	Gene	Change expression
+Chemical / Dietary Supplement / Drug / Food	Human / Animal	Administered
+DDF	Anatomical Location	Strike
+DDF	Bacteria / Microbiome	Change abundance
+DDF	Chemical	Interact
+DDF	DDF	Affect / Is a
+DDF	Human / Animal	Target
+Drug	Chemical / Drug	Interact
+Drug	DDF	Change effect
+Human / Animal / Microbiome	Biomedical Technique	Used by
+Microbiome	Anatomical Location / Human / Animal	Located in
+Microbiome	Gene	Change expression
+Microbiome	DDF	Is linked to
+Microbiome	Microbiome	Compared to
+
+Extraction rules:
+
+Extract relations only if supported by the abstract.
+Maximise the number of extracted entities and relations.
+If a mechanism is described, extract both the high-level and mechanistic relations when justified.
+Ignore vague background statements unless they encode a meaningful domain relation.
+Do not include speculative claims unless explicitly presented as findings; if necessary, prefer ASSOCIATED_WITH or LINKED_TO over strong causal verbs.
+
+Output format:
+Return one extracted relation per line.
+Use exactly this format:
+[ENTITY1, TYPE1, RELATION, ENTITY2, TYPE2]
+Do not include explanations, commentary, confidence scores, or extra text.
+'''
+
+Example = """The anti-cognitive deficit effects of NSPs were associated with the modulation of amyloid β (Aβ) deposition, p-Tau aggregation, oxidative stress, inflammation"""
+
+Output = """[NSPs, DIETARY SUPPLEMENT, INFLUENCE, amyloid β (Aβ) deposition, DDF]
+[NSPs, DIETARY SUPPLEMENT, INFLUENCE, p-Tau aggregation, DDF]
+[NSPs, DIETARY SUPPLEMENT, INFLUENCE, oxidative stress, DDF]
+[NSPs, DIETARY SUPPLEMENT, INFLUENCE, inflammation, DDF]"""
+
+

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triple Viewer – Entity &amp; Relation Visualizer</title>
+
+    <!-- vis.js from CDN for the knowledge graph -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>🔬 Triple Viewer</h1>
+    <p class="subtitle">Highlight entities &amp; visualize relations from biomedical text</p>
+</header>
+
+<main>
+    <!-- ─── LLM API KEY PANEL ───────────────────────────────────── -->
+    <section id="llm-key-section">
+        <details {% if not has_api_key %}open{% endif %}>
+            <summary>🔑 Azure OpenAI API Key
+                {% if has_api_key %}
+                    <span class="key-status key-ok">✔ Key loaded</span>
+                {% else %}
+                    <span class="key-status key-missing">✖ No key</span>
+                {% endif %}
+            </summary>
+            <div class="key-panel">
+                <p class="key-info">
+                    Endpoint: <code>{{ azure_endpoint }}</code> &nbsp;|&nbsp;
+                    Deployment: <code>{{ azure_deployment }}</code>
+                </p>
+                <form method="POST" class="key-form">
+                    <input type="hidden" name="action" value="save_key">
+                    <input type="hidden" name="selected_file" value="{{ selected_file }}">
+                    <input type="hidden" name="triples_raw" value="{{ triples_raw }}">
+                    <input type="hidden" name="selected_system_prompt" value="{{ selected_system_prompt }}">
+                    <input type="hidden" name="selected_user_prompt" value="{{ selected_user_prompt }}">
+                    <input type="password" name="api_key" placeholder="Paste your Azure OpenAI API key…"
+                           class="key-input" autocomplete="off">
+                    <button type="submit" class="btn-small btn-key">Save Key</button>
+                </form>
+                {% if has_api_key %}
+                <form method="POST" class="key-form" style="margin-top:0.3rem;">
+                    <input type="hidden" name="action" value="clear_key">
+                    <input type="hidden" name="selected_file" value="{{ selected_file }}">
+                    <input type="hidden" name="triples_raw" value="{{ triples_raw }}">
+                    <input type="hidden" name="selected_system_prompt" value="{{ selected_system_prompt }}">
+                    <input type="hidden" name="selected_user_prompt" value="{{ selected_user_prompt }}">
+                    <button type="submit" class="btn-small btn-danger">Clear Key</button>
+                </form>
+                {% endif %}
+            </div>
+        </details>
+    </section>
+
+    <!-- ─── INPUT FORM ──────────────────────────────────────────── -->
+    <form method="POST" enctype="multipart/form-data" id="main-form">
+        <div class="form-grid">
+
+            <!-- Left: document input -->
+            <fieldset>
+                <legend>📄 Document</legend>
+
+                <label for="selected_file">Select a PubMed file from the project:</label>
+                <select name="selected_file" id="selected_file">
+                    <option value="">— choose —</option>
+                    {% for f in files %}
+                    <option value="{{ f }}" {% if f == selected_file %}selected{% endif %}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="doc_upload" class="or-label">…or upload a text file:</label>
+                <input type="file" name="doc_upload" id="doc_upload" accept=".txt">
+
+                <label for="doc_text">Document text preview:</label>
+                <textarea name="doc_text" id="doc_text" rows="10" readonly>{{ doc_text }}</textarea>
+            </fieldset>
+
+            <!-- Right: triples + LLM extraction -->
+            <fieldset>
+                <legend>🔗 Triples</legend>
+
+                <!-- LLM extraction controls -->
+                <div class="llm-extract-panel">
+                    <label for="selected_system_prompt">System prompt:</label>
+                    <select name="selected_system_prompt" id="selected_system_prompt">
+                        {% for sp in system_prompts %}
+                        <option value="{{ sp }}" {% if sp == selected_system_prompt %}selected{% endif %}>{{ sp }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label for="selected_user_prompt">User prompt template:</label>
+                    <select name="selected_user_prompt" id="selected_user_prompt">
+                        {% for up in user_prompts %}
+                        <option value="{{ up }}" {% if up == selected_user_prompt %}selected{% endif %}>{{ up }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" name="action" value="extract" class="btn-extract"
+                            {% if not has_api_key %}disabled title="Enter API key first"{% endif %}>
+                        🤖 Extract with LLM
+                    </button>
+
+                    {% if llm_error %}
+                    <div class="llm-error">⚠ {{ llm_error }}</div>
+                    {% endif %}
+
+                    {% if llm_usage %}
+                    <div class="llm-usage">
+                        <div class="usage-row">
+                            <span>🧠 <strong>Model:</strong> {{ llm_usage.model }}</span>
+                        </div>
+                        <div class="usage-row">
+                            <span>📊 <strong>Prompt:</strong> {{ llm_usage.prompt_tokens }} tokens</span>
+                            {% if llm_usage.cached_tokens > 0 %}
+                            <span>({{ llm_usage.cached_tokens }} cached)</span>
+                            {% endif %}
+                            <span><strong>Completion:</strong> {{ llm_usage.completion_tokens }} tokens</span>
+                            <span><strong>Total:</strong> {{ llm_usage.total_tokens }} tokens</span>
+                        </div>
+                        <div class="usage-row usage-cost">
+                            💰 <strong>Estimated cost:</strong>
+                            <span>Input ${{ "%.6f"|format(llm_usage.input_cost) }}</span>
+                            {% if llm_usage.cached_tokens > 0 %}
+                            <span>+ Cached ${{ "%.6f"|format(llm_usage.cached_cost) }}</span>
+                            {% endif %}
+                            <span>+ Output ${{ "%.6f"|format(llm_usage.output_cost) }}</span>
+                            <span>= <strong>${{ "%.6f"|format(llm_usage.total_cost) }}</strong></span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <details class="pricing-legend">
+                        <summary>💲 {{ azure_model }} pricing reference</summary>
+                        <table class="pricing-table">
+                            <thead><tr><th>Token type</th><th>Price per 1M tokens</th></tr></thead>
+                            <tbody>
+                                <tr><td>Input tokens</td><td>${{ "%.2f"|format(price_input) }}</td></tr>
+                                <tr><td>Output tokens</td><td>${{ "%.2f"|format(price_output) }}</td></tr>
+                                <tr><td>Cached input tokens</td><td>${{ "%.2f"|format(price_cached) }}</td></tr>
+                            </tbody>
+                        </table>
+                    </details>
+                </div>
+
+                <label for="triples_raw">
+                    One triple per line in the format:<br>
+                    <code>[entity1, TYPE1, RELATION, entity2, TYPE2]</code>
+                </label>
+                <textarea name="triples_raw" id="triples_raw" rows="16"
+                          placeholder="[Steroid hormones, CHEMICAL, REGULATE, cognitive impairment, DISEASE]">{{ triples_raw }}</textarea>
+            </fieldset>
+        </div>
+
+        <button type="submit" name="action" value="visualize" class="btn-primary">Visualize</button>
+    </form>
+
+    {% if highlighted %}
+    <!-- ─── HIGHLIGHTED DOCUMENT ────────────────────────────────── -->
+    <section id="doc-section">
+        <h2>📝 Annotated Document</h2>
+
+        <!-- colour legend -->
+        <div class="legend">
+            {% for etype, color in type_colors.items() %}
+            <span class="legend-chip" style="background:{{ color }};">{{ etype }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="highlighted-doc">{{ highlighted }}</div>
+    </section>
+
+    <!-- ─── TRIPLES TABLE ───────────────────────────────────────── -->
+    <section id="triples-section">
+        <h2>📋 Extracted Triples ({{ triples|length }})</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Entity 1</th>
+                        <th>Type</th>
+                        <th>Relation</th>
+                        <th>Entity 2</th>
+                        <th>Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for t in triples %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><span class="cell-entity" style="border-left:4px solid {{ type_colors.get(t.t1, default_color) }}">{{ t.e1 }}</span></td>
+                        <td><span class="badge" style="background:{{ type_colors.get(t.t1, default_color) }}">{{ t.t1 }}</span></td>
+                        <td class="rel-cell">{{ t.rel }}</td>
+                        <td><span class="cell-entity" style="border-left:4px solid {{ type_colors.get(t.t2, default_color) }}">{{ t.e2 }}</span></td>
+                        <td><span class="badge" style="background:{{ type_colors.get(t.t2, default_color) }}">{{ t.t2 }}</span></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ─── KNOWLEDGE GRAPH ─────────────────────────────────────── -->
+    <section id="graph-section">
+        <h2>🕸️ Knowledge Graph</h2>
+        <div id="kg-network"></div>
+    </section>
+
+    <script>
+    (function() {
+        const triples = {{ triples | tojson }};
+        const typeColors = {{ type_colors | tojson }};
+        const defaultColor = {{ default_color | tojson }};
+
+        const nodeMap = {};
+        const edges = [];
+
+        triples.forEach(function(t, idx) {
+            const key1 = t.e1.toLowerCase();
+            const key2 = t.e2.toLowerCase();
+
+            if (!nodeMap[key1]) {
+                nodeMap[key1] = {
+                    id: key1,
+                    label: t.e1,
+                    color: {background: typeColors[t.t1] || defaultColor, border: '#555'},
+                    font: {size: 14},
+                    shape: 'box',
+                    margin: 10,
+                };
+            }
+            if (!nodeMap[key2]) {
+                nodeMap[key2] = {
+                    id: key2,
+                    label: t.e2,
+                    color: {background: typeColors[t.t2] || defaultColor, border: '#555'},
+                    font: {size: 14},
+                    shape: 'box',
+                    margin: 10,
+                };
+            }
+            edges.push({
+                from: key1,
+                to: key2,
+                label: t.rel,
+                arrows: 'to',
+                font: {size: 11, align: 'top', color: '#444'},
+                color: {color: '#888'},
+                smooth: {type: 'curvedCW', roundness: 0.15 + (idx % 5) * 0.05},
+            });
+        });
+
+        const nodes = new vis.DataSet(Object.values(nodeMap));
+        const edgeSet = new vis.DataSet(edges);
+
+        const container = document.getElementById('kg-network');
+        const data = {nodes: nodes, edges: edgeSet};
+        const options = {
+            layout: {improvedLayout: true},
+            physics: {
+                solver: 'forceAtlas2Based',
+                forceAtlas2Based: {gravitationalConstant: -60, springLength: 160},
+                stabilization: {iterations: 200},
+            },
+            interaction: {hover: true, zoomView: true, dragView: true},
+        };
+        new vis.Network(container, data, options);
+    })();
+    </script>
+    {% endif %}
+</main>
+
+<!-- Update document preview when dropdown changes -->
+<script>
+document.getElementById('selected_file').addEventListener('change', function() {
+    const filename = this.value;
+    const preview = document.getElementById('doc_text');
+    if (!filename) {
+        preview.value = '';
+        return;
+    }
+    fetch('/file_content?name=' + encodeURIComponent(filename))
+        .then(r => r.json())
+        .then(data => {
+            preview.value = data.text || '';
+        })
+        .catch(() => {
+            preview.value = 'Error loading file.';
+        });
+});
+</script>
+
+</body>
+</html>
+

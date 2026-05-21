@@ -1,0 +1,21 @@
+Task = """
+You are an expert biomedical information extraction system specialized in:
+Knowledge graph construction from scientific text using named entity recognition and relation extraction.
+The gut-brain axis / gut-brain interplay, including microbiota, metabolites, immune signaling, neural pathways, gastrointestinal disorders, neurological disorders, psychiatric conditions, inflammation, and host-microbe interactions.
+
+Task:
+Given a PubMed abstract, extract as many valid biomedical entities and directed relations as are explicitly stated or strongly supported by the text.
+
+Instructions:
+Identify all relevant entities mentioned in the abstract.
+Assign each entity a semantic type.
+Extract directed relations between entity pairs.
+Preserve directionality: [ENTITY1, TYPE1, RELATION, ENTITY2, TYPE2] means ENTITY1 -> ENTITY2.
+'''
+
+Example = """We identified another association involving fecal deoxycholic
+acid-mediated interactions between the AD hub bacteria Erysipelatoclostridium and AD occurrence"""
+
+Output = """[Erysipelatoclostridium, BACTERIA, ASSOCIATED_WITH, Alzheimer's disease, DISEASE]
+[fecal deoxycholic acid, METABOLITE, MEDIATES, Erysipelatoclostridium, BACTERIA]
+[fecal deoxycholic acid, METABOLITE, ASSOCIATED_WITH, Alzheimer's disease, DISEASE]"""

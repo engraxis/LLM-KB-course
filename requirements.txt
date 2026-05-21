@@ -8,3 +8,5 @@ sentence-transformers
 transformers
 faiss-cpu  # comment/remove if not available for your platform
 anthropic
+openai
+flask

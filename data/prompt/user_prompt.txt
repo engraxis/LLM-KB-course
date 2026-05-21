@@ -1,0 +1,4 @@
+Extract entities and relations from the following document.
+
+Document:
+{document_text}

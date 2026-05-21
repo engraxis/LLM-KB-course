@@ -1,0 +1,316 @@
+/* ── Triple Viewer – stylesheet ─────────────────────────────────────── */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: #f4f6f9;
+    color: #222;
+    line-height: 1.6;
+    padding: 0 1rem 3rem;
+}
+
+header {
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+}
+header h1 { font-size: 1.8rem; }
+.subtitle  { color: #666; font-size: 0.95rem; }
+
+main { max-width: 1100px; margin: 0 auto; }
+
+/* ── Form ───────────────────────────────────────────────────────────── */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem;
+    margin-bottom: 1rem;
+}
+@media (max-width: 750px) {
+    .form-grid { grid-template-columns: 1fr; }
+}
+
+fieldset {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    background: #fff;
+}
+legend {
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 0 0.4rem;
+}
+
+label {
+    display: block;
+    margin-top: 0.6rem;
+    font-size: 0.88rem;
+    color: #444;
+}
+.or-label { margin-top: 0.8rem; font-style: italic; }
+
+select, input[type="file"] {
+    width: 100%;
+    padding: 0.4rem;
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+}
+
+textarea {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+    font-family: "Cascadia Code", "Fira Code", monospace;
+    font-size: 0.82rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    resize: vertical;
+}
+textarea[readonly] { background: #f9f9f9; }
+
+code {
+    background: #eee;
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 0.7rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-primary:hover { background: #1d4ed8; }
+
+/* ── Highlighted document ───────────────────────────────────────────── */
+#doc-section, #triples-section, #graph-section {
+    margin-top: 2rem;
+    background: #fff;
+    padding: 1.2rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+h2 { font-size: 1.2rem; margin-bottom: 0.8rem; }
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+}
+.legend-chip {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.highlighted-doc {
+    white-space: pre-wrap;
+    font-size: 0.92rem;
+    line-height: 1.85;
+}
+
+mark.entity {
+    padding: 0.15rem 0.3rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+sub.entity-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    vertical-align: sub;
+    margin-left: 2px;
+    opacity: 0.7;
+}
+
+/* ── Triples table ──────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+thead { background: #f0f0f0; }
+th, td {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+.cell-entity { padding-left: 0.5rem; }
+.badge {
+    display: inline-block;
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.rel-cell {
+    font-weight: 600;
+    font-family: monospace;
+    color: #555;
+}
+
+/* ── API Key panel ──────────────────────────────────────────────────── */
+#llm-key-section {
+    margin-bottom: 1rem;
+    background: #fff;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+#llm-key-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+.key-status {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+}
+.key-ok      { background: #d4edda; color: #155724; }
+.key-missing { background: #f8d7da; color: #721c24; }
+.key-panel   { margin-top: 0.6rem; }
+.key-info    { font-size: 0.82rem; color: #555; margin-bottom: 0.5rem; }
+.key-form    { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.key-input   {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.88rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+}
+.btn-small {
+    padding: 0.35rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-key    { background: #28a745; color: #fff; }
+.btn-key:hover { background: #218838; }
+.btn-danger { background: #dc3545; color: #fff; }
+.btn-danger:hover { background: #c82333; }
+
+/* ── LLM extract panel ─────────────────────────────────────────────── */
+.llm-extract-panel {
+    background: #f0f4ff;
+    padding: 0.7rem;
+    border-radius: 6px;
+    margin-bottom: 0.8rem;
+    border: 1px solid #c5d5f5;
+}
+.llm-extract-panel label {
+    margin-top: 0.3rem;
+    font-size: 0.82rem;
+    color: #333;
+}
+.llm-extract-panel select {
+    width: 100%;
+    padding: 0.3rem;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+}
+.btn-extract {
+    display: block;
+    width: 100%;
+    margin-top: 0.6rem;
+    padding: 0.55rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    background: #6f42c1;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-extract:hover:not(:disabled) { background: #5a32a3; }
+.btn-extract:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+.llm-error {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    font-size: 0.82rem;
+}
+.llm-usage {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    border-radius: 4px;
+    font-size: 0.82rem;
+}
+.usage-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.25rem;
+}
+.usage-cost {
+    padding-top: 0.3rem;
+    border-top: 1px dashed #a8d8e0;
+    margin-top: 0.2rem;
+    font-size: 0.84rem;
+}
+
+/* Collapsible pricing legend */
+.pricing-legend {
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    color: #555;
+}
+.pricing-legend summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #444;
+}
+.pricing-table {
+    width: 100%;
+    margin-top: 0.3rem;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+}
+.pricing-table th,
+.pricing-table td {
+    text-align: left;
+    padding: 0.25rem 0.5rem;
+    border-bottom: 1px solid #ddd;
+}
+.pricing-table thead {
+    background: #e9ecef;
+}
+
+/* ── Knowledge graph container ──────────────────────────────────────── */
+#kg-network {
+    width: 100%;
+    height: 520px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
