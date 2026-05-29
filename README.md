@@ -34,6 +34,11 @@ Run notebooks in order, since later notebooks build on earlier outputs and graph
 | 02 | `notebooks/02-load-phenotype-local-hpoa.ipynb` | Load local HPOA annotations into pandas and explore schema/quality checks. |
 | 03 | `notebooks/03-extract-hpoa-tuple-and-resolve-labels.ipynb` | Build annotation tuples and resolve term labels from ontology IDs. |
 | 04 | `notebooks/04-build-rdf-phenotypic-annotation-graph.ipynb` | Create an RDF phenotypic-annotation graph from cleaned annotation records. |
+   The config only allows apoc.* — n10s is not included. Edit those two lines to add n10s.*:
+   Open the conf file: /conf/neo4j.conf"
+   Find these two lines and change them to:
+   confdbms.security.procedures.unrestricted=apoc.*,n10s.*
+   dbms.security.procedures.allowlist=apoc.*,n10s.*
 | 05 | `notebooks/05-connect-neo4j-kb-llm-hpo.ipynb` | Connect to Neo4j, set constraints/indexes, and initialize Neosemantics (`n10s`). |
 | 06 | `notebooks/06-check-hpo-database-populated.ipynb` | Validate that the Neo4j HPO graph is populated and inspect key node/relationship statistics. |
 | 07 | `notebooks/07-load-hpoa-annotation-data.ipynb` | Load disease-phenotype annotation data into Neo4j and enrich relationship metadata. |
